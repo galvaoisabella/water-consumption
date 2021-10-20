@@ -54,70 +54,69 @@ const int led = LED_BUILTIN;
 int estadobotao = LOW;
 
 
-void setup() 
+void setup()
 {
-    // Iniciamos a serial com velocidade de 115200
-    Serial.begin(115200);
+  // Iniciamos a serial com velocidade de 115200
+  Serial.begin(115200);
 
-    // Definimos o pino como saída
-    pinMode(led, OUTPUT);
-    // Definindo botão flash como entrada
-    pinMode(BUTTON, INPUT_PULLUP); 
+  // Definimos o pino como saída
+  pinMode(led, OUTPUT);
+  // Definindo botão flash como entrada
+  pinMode(BUTTON, INPUT_PULLUP);
 
-    //configuracao do pino do sensor como entrada em nivel logico alto
-    pinMode(PINO_SENSOR, INPUT_PULLUP);
+  //configuracao do pino do sensor como entrada em nivel logico alto
+  pinMode(PINO_SENSOR, INPUT_PULLUP);
 
-    WiFi.mode(WIFI_STA);
-    
-    // Conectamos o wifi
-    WiFi.begin(ssid, password);
+  WiFi.mode(WIFI_STA);
 
-    // Enquanto não conectar printamos um "."
-    while(WiFi.status() != WL_CONNECTED)
-    {
-        Serial.print(".");
-        delay(1000);
-    }
+  // Conectamos o wifi
+  WiFi.begin(ssid, password);
 
-    // Exibimos "WiFi Conectado"
-    Serial.println("Connected to Wifi, Connecting to server.");
+  // Enquanto não conectar printamos um "."
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.print(".");
+    delay(1000);
+  }
 
-    // Tentamos conectar com o websockets server
-    bool connected = client.connect(websockets_server_host, websockets_server_port, "/");
+  // Exibimos "WiFi Conectado"
+  Serial.println("Connected to Wifi, Connecting to server.");
 
-    // Se foi possível conectar
-    if(connected) 
-    {
-        // Exibimos mensagem de sucesso
-        Serial.println("Connected!");
-        // Enviamos uma msg "Hello Server" para o servidor
-        client.send("Hello Server");
-    }   // Se não foi possível conectar
-    else 
-    {
-        // Exibimos mensagem de falha
-        Serial.println("Not Connected!");
-        return;
-    }
-    
-    // Iniciamos o callback onde as mesagens serão recebidas
-    client.onMessage([&](WebsocketsMessage message)
-    {        
-        // Exibimos a mensagem recebida na serial
-        Serial.print("Got Message: ");
-        Serial.println(message.data());
+  // Tentamos conectar com o websockets server
+  bool connected = client.connect(websockets_server_host, websockets_server_port, "/");
 
-        // Ligamos/Desligamos o led de acordo com o comando
-        if(message.data().equalsIgnoreCase("ON"))
-            digitalWrite(led, HIGH);
-        else
-        if(message.data().equalsIgnoreCase("OFF"))
-            digitalWrite(led, LOW);
-    });
+  // Se foi possível conectar
+  if (connected)
+  {
+    // Exibimos mensagem de sucesso
+    Serial.println("Connected!");
+    // Enviamos uma msg "Hello Server" para o servidor
+    client.send("Hello Server");
+  }   // Se não foi possível conectar
+  else
+  {
+    // Exibimos mensagem de falha
+    Serial.println("Not Connected!");
+    return;
+  }
+
+  // Iniciamos o callback onde as mesagens serão recebidas
+  client.onMessage([&](WebsocketsMessage message)
+  {
+    // Exibimos a mensagem recebida na serial
+    Serial.print("Got Message: ");
+    Serial.println(message.data());
+
+    // Ligamos/Desligamos o led de acordo com o comando
+    if (message.data().equalsIgnoreCase("ON"))
+      digitalWrite(led, HIGH);
+    else if (message.data().equalsIgnoreCase("OFF"))
+      digitalWrite(led, LOW);
+  });
 
 
-    // ArduinoOTA config
-      ArduinoOTA.onStart([]() {
+  // ArduinoOTA config
+  ArduinoOTA.onStart([]() {
     String type;
     if (ArduinoOTA.getCommand() == U_FLASH) {
       type = "sketch";
@@ -154,28 +153,33 @@ void setup()
   Serial.println(WiFi.localIP());
 }
 
-void loop() 
+void loop()
 {
   ArduinoOTA.handle();
-    //  De tempo em tempo, o websockets client checa por novas mensagens recebidas
-    if(client.available()) 
-        client.poll();
+  //  De tempo em tempo, o websockets client checa por novas mensagens recebidas
+  if (client.available())
+    client.poll();
 
   // Verifica se o botao reset foi pressionado
   // estadobotao = digitalRead(BUTTON);
   // digitalWrite(led, HIGH);
 
   // Teste botão
- // if (estadobotao == LOW) {
- //   contador = contador++;
- //  Serial.println("Botão Pressionado");
- //   client.send(contador);
- // }  
- //delay(300);
+  // if (estadobotao == LOW) {
+  //   contador = contador++;
+  //  Serial.println("Botão Pressionado");
+  //   client.send(contador);
+  // }
+  //delay(300);
 
- 
-//executa a contagem de pulsos uma vez por segundo
-  if((millis() - tempo_antes) > 1000){
+  readSensorFluke();
+
+}
+
+
+void readSensorFluke() {
+  //executa a contagem de pulsos uma vez por segundo
+  if ((millis() - tempo_antes) > 1000) {
 
     //desabilita a interrupcao para realizar a conversao do valor de pulsos
     detachInterrupt(INTERRUPCAO_SENSOR);
@@ -199,7 +203,7 @@ void loop()
     Serial.print(volume_total);
     Serial.println(" L");
     Serial.println();
-   
+
     //reinicializacao do contador de pulsos
     contador = 0;
 
@@ -208,14 +212,13 @@ void loop()
 
     //contagem de pulsos do sensor
     attachInterrupt(INTERRUPCAO_SENSOR, contador_pulso, FALLING);
-    
+
   }
-   
 }
 
 //funcao chamada pela interrupcao para contagem de pulsos
 void contador_pulso() {
-  
+
   contador++;
-  
+
 }
