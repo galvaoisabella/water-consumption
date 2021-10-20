@@ -9,23 +9,50 @@
 #define STAPSK  "minhasenha123"
 #endif
 
-#define BUTTON D3
+#define BUTTON D3 // Botão flash arduino
 
+/*****************************************************************************************/
+/************************************** SENSOR *******************************************/
+/*****************************************************************************************/
+//definicao do pino do sensor e de interrupcao
+const int INTERRUPCAO_SENSOR = 0; //interrupt = 0 equivale ao pino digital 2
+const int PINO_SENSOR = 2;
+
+//definicao da variavel de contagem de voltas
+unsigned long contador = 0;
+
+//definicao do fator de calibracao para conversao do valor lido
+const float FATOR_CALIBRACAO = 4.5;
+
+//definicao das variaveis de fluxo e volume
+float fluxo = 0;
+float volume = 0;
+float volume_total = 0;
+
+//definicao da variavel de intervalo de tempo
+unsigned long tempo_antes = 0;
+/*****************************************************************************************/
+
+/*****************************************************************************************/
+/************************** WEBSOCKET ***************************************************/
+/*****************************************************************************************/
 const char* ssid = STASSID; // Nome da rede
 const char* password = STAPSK; // Senha da rede
 const char* websockets_server_host = "10.10.2.228"; // IP do servidor websocket
 const int websockets_server_port = 80; // Porta de conexão do servidor
-const char* contador = 0;
-int estadobotao = LOW;
 
 // Utilizamos o namespace de websocket para podermos utilizar a classe WebsocketsClient
 using namespace websockets;
 
 // Objeto websocket client
 WebsocketsClient client;
+/*****************************************************************************************/
 
 // Led
 const int led = LED_BUILTIN;
+//const char* contador = 0;
+int estadobotao = LOW;
+
 
 void setup() 
 {
@@ -36,6 +63,9 @@ void setup()
     pinMode(led, OUTPUT);
     // Definindo botão flash como entrada
     pinMode(BUTTON, INPUT_PULLUP); 
+
+    //configuracao do pino do sensor como entrada em nivel logico alto
+    pinMode(PINO_SENSOR, INPUT_PULLUP);
 
     WiFi.mode(WIFI_STA);
     
@@ -131,16 +161,61 @@ void loop()
     if(client.available()) 
         client.poll();
 
-     // Verifica se o botao reset foi pressionado
-  estadobotao = digitalRead(BUTTON);
-  //digitalWrite(led, HIGH);
+  // Verifica se o botao reset foi pressionado
+  // estadobotao = digitalRead(BUTTON);
+  // digitalWrite(led, HIGH);
 
   // Teste botão
  // if (estadobotao == LOW) {
  //   contador = contador++;
  //  Serial.println("Botão Pressionado");
  //   client.send(contador);
- //   delay(300);
  // }  
- delay(300);
+ //delay(300);
+
+ 
+//executa a contagem de pulsos uma vez por segundo
+  if((millis() - tempo_antes) > 1000){
+
+    //desabilita a interrupcao para realizar a conversao do valor de pulsos
+    detachInterrupt(INTERRUPCAO_SENSOR);
+
+    //conversao do valor de pulsos para L/min
+    fluxo = ((1000.0 / (millis() - tempo_antes)) * contador) / FATOR_CALIBRACAO;
+
+    //exibicao do valor de fluxo
+    Serial.print("Fluxo de: ");
+    Serial.print(fluxo);
+    Serial.println(" L/min");
+
+    //calculo do volume em L passado pelo sensor
+    volume = fluxo / 60;
+
+    //armazenamento do volume
+    volume_total += volume;
+
+    //exibicao do valor de volume
+    Serial.print("Volume: ");
+    Serial.print(volume_total);
+    Serial.println(" L");
+    Serial.println();
+   
+    //reinicializacao do contador de pulsos
+    contador = 0;
+
+    //atualizacao da variavel tempo_antes
+    tempo_antes = millis();
+
+    //contagem de pulsos do sensor
+    attachInterrupt(INTERRUPCAO_SENSOR, contador_pulso, FALLING);
+    
+  }
+   
+}
+
+//funcao chamada pela interrupcao para contagem de pulsos
+void contador_pulso() {
+  
+  contador++;
+  
 }
