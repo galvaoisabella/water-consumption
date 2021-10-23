@@ -15,7 +15,7 @@
 #define LEDTEST false
 
 /*****************************************************************************************/
-/************************************** SENSOR *******************************************/
+//    SENSOR
 /*****************************************************************************************/
 long currentMillis = 0;
 long previousMillis = 0;
@@ -31,14 +31,12 @@ unsigned int totalMilliLitres;
 float flowLitres;
 float totalLitres;
 
-void IRAM_ATTR pulseCounter()
-{
+void IRAM_ATTR pulseCounter(){
   pulseCount++;
 }
-/*****************************************************************************************/
 
 /*****************************************************************************************/
-/************************** WEBSOCKET ***************************************************/
+//                                WEBSOCKET 
 /*****************************************************************************************/
 const char* ssid = STASSID; // Nome da rede
 const char* password = STAPSK; // Senha da rede
@@ -51,13 +49,16 @@ using namespace websockets;
 // Objeto websocket client
 WebsocketsClient client;
 /*****************************************************************************************/
+//                            Itens de teste
+/*****************************************************************************************/
 
 // Led
 const int led = LED_BUILTIN;
-//const char* contador = 0;
 int buttonState = LOW;
 
-
+/*****************************************************************************************/
+//                            Metodo setup
+/*****************************************************************************************/
 void setup() {
   // Inicia a serial com velocidade de 115200
   Serial.begin(115200);
@@ -112,7 +113,7 @@ void setup() {
   }
 
   // Callback onde as mesagens serão recebidas
-  client.onMessage([&](WebsocketsMessage message) 
+  client.onMessage([&](WebsocketsMessage message)
   {
     if (LEDTEST) {
       //Exibe mensagem recebida na serial
@@ -124,9 +125,9 @@ void setup() {
         digitalWrite(led, HIGH);
       else if (message.data().equalsIgnoreCase("OFF"))
         digitalWrite(led, LOW);
-      }
+    }
   });
- 
+
 
   // Configuração ArduinoOTA
   ArduinoOTA.onStart([]() {
@@ -137,7 +138,6 @@ void setup() {
       type = "filesystem";
     }
 
-    // NOTE: if updating FS this would be the place to unmount FS using FS.end()
     Serial.println("Start updating " + type);
   });
   ArduinoOTA.onEnd([]() {
@@ -165,15 +165,17 @@ void setup() {
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 }
-
+/*****************************************************************************************/
+//                                   Função loop
+/*****************************************************************************************/
 void loop() {
   listenService();
   readSensorFlow();
 }
 
-/**
-   Método que escuta informações enviadas do servidor
-*/
+/*****************************************************************************************/
+//             Método que escuta informações enviadas do servidor
+/*****************************************************************************************/
 void listenService() {
   ArduinoOTA.handle();
   //  De tempo em tempo, o websockets client checa por novas mensagens recebidas
@@ -182,9 +184,10 @@ void listenService() {
 }
 
 
-/**
-   Método que faz a leitura e interpretação dos dados recebidos pelo sensor
-*/
+/*****************************************************************************************/
+//                 Método que faz a leitura e interpretação 
+//                      dos dados recebidos pelo sensor
+/*****************************************************************************************/
 void readSensorFlow() {
   currentMillis = millis();
   //Leitura sensor
@@ -218,7 +221,8 @@ void readSensorFlow() {
     }
   }
 
-  if (currentMillis - previousMillisService > oneHour) {
+  //Rotina de envio de volume ao servidor
+  if (currentMillis - previousMillisService > oneHour/4 ) {
     client.send(String(totalLitres));
     Serial.println("Enviado ao servidor");
     previousMillisService = millis();
