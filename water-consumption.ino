@@ -1,29 +1,93 @@
+#include <ArduinoWebsockets.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
 
 #ifndef STASSID
-#define STASSID "***"
-#define STAPSK  "***"
+#define STASSID "GALVAO"
+#define STAPSK  "minhasenha123"
 #endif
 
-const char* ssid = STASSID;
-const char* password = STAPSK;
+#define BUTTON D3
 
-void setup() {
-  Serial.begin(115200);
-  Serial.println("Booting");
-  pinMode(LED_BUILTIN, OUTPUT);
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-    Serial.println("Connection Failed! Rebooting...");
-    delay(5000);
-    ESP.restart();
-  }
+const char* ssid = STASSID; // Nome da rede
+const char* password = STAPSK; // Senha da rede
+const char* websockets_server_host = "10.10.2.228"; // IP do servidor websocket
+const int websockets_server_port = 80; // Porta de conexão do servidor
+const char* contador = 0;
+int estadobotao = LOW;
 
-  ArduinoOTA.onStart([]() {
+// Utilizamos o namespace de websocket para podermos utilizar a classe WebsocketsClient
+using namespace websockets;
+
+// Objeto websocket client
+WebsocketsClient client;
+
+// Led
+const int led = LED_BUILTIN;
+
+void setup() 
+{
+    // Iniciamos a serial com velocidade de 115200
+    Serial.begin(115200);
+
+    // Definimos o pino como saída
+    pinMode(led, OUTPUT);
+    // Definindo botão flash como entrada
+    pinMode(BUTTON, INPUT_PULLUP); 
+
+    WiFi.mode(WIFI_STA);
+    
+    // Conectamos o wifi
+    WiFi.begin(ssid, password);
+
+    // Enquanto não conectar printamos um "."
+    while(WiFi.status() != WL_CONNECTED)
+    {
+        Serial.print(".");
+        delay(1000);
+    }
+
+    // Exibimos "WiFi Conectado"
+    Serial.println("Connected to Wifi, Connecting to server.");
+
+    // Tentamos conectar com o websockets server
+    bool connected = client.connect(websockets_server_host, websockets_server_port, "/");
+
+    // Se foi possível conectar
+    if(connected) 
+    {
+        // Exibimos mensagem de sucesso
+        Serial.println("Connected!");
+        // Enviamos uma msg "Hello Server" para o servidor
+        client.send("Hello Server");
+    }   // Se não foi possível conectar
+    else 
+    {
+        // Exibimos mensagem de falha
+        Serial.println("Not Connected!");
+        return;
+    }
+    
+    // Iniciamos o callback onde as mesagens serão recebidas
+    client.onMessage([&](WebsocketsMessage message)
+    {        
+        // Exibimos a mensagem recebida na serial
+        Serial.print("Got Message: ");
+        Serial.println(message.data());
+
+        // Ligamos/Desligamos o led de acordo com o comando
+        if(message.data().equalsIgnoreCase("ON"))
+            digitalWrite(led, HIGH);
+        else
+        if(message.data().equalsIgnoreCase("OFF"))
+            digitalWrite(led, LOW);
+    });
+
+
+    // ArduinoOTA config
+      ArduinoOTA.onStart([]() {
     String type;
     if (ArduinoOTA.getCommand() == U_FLASH) {
       type = "sketch";
@@ -60,10 +124,23 @@ void setup() {
   Serial.println(WiFi.localIP());
 }
 
-void loop() {
- digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
- delay(1000);                       // wait for a second
- digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
- delay(1000);                       // wait for a 
+void loop() 
+{
   ArduinoOTA.handle();
+    //  De tempo em tempo, o websockets client checa por novas mensagens recebidas
+    if(client.available()) 
+        client.poll();
+
+     // Verifica se o botao reset foi pressionado
+  estadobotao = digitalRead(BUTTON);
+  //digitalWrite(led, HIGH);
+
+  // Teste botão
+ // if (estadobotao == LOW) {
+ //   contador = contador++;
+ //  Serial.println("Botão Pressionado");
+ //   client.send(contador);
+ //   delay(300);
+ // }  
+ delay(300);
 }
