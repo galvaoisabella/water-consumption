@@ -1,0 +1,50 @@
+<div class="list row">
+  <div class="col-md-6">
+    <h4>Tutorials List</h4>
+    <ul class="list-group">
+      <li class="list-group-item" *ngFor="let data of sensorData; let i = index" [class.active]="i == currentIndex"
+        (click)="setActiveTutorial(data, i)">
+        {{ data.createdAt }}
+      </li>
+    </ul>
+  </div>
+  <div class="col-md-6">
+    <div *ngIf="currentTutorial">
+      <h4>Tutorial</h4>
+      <div>
+        <label><strong>Title:</strong></label> {{ currentTutorial.createdAt }}
+      </div>
+      <div>
+        <label><strong>Description:</strong></label>
+        {{ currentTutorial.sensor }}
+      </div>
+    </div>
+
+    <div *ngIf="!currentTutorial">
+      <br />
+      <p>Please click on a Tutorial...</p>
+    </div>
+  </div>
+</div>
+
+<!-- GRAFICO LINHA -->
+<div style="display: block;">
+  <canvas baseChart  [datasets]="lineChartData" [labels]="lineChartLabels"
+    [options]="lineChartOptions" [colors]="lineChartColors" [legend]="lineChartLegend" chartType="line"
+    [plugins]="lineChartPlugins">
+  </canvas>
+</div>
+
+
+<!-- GRAFICO BARRA -->
+<!-- <div>
+      <div style="display: block">
+        <canvas baseChart
+                [datasets]="barChartData"
+                [labels]="barChartLabels"
+                [options]="barChartOptions"
+                [legend]="barChartLegend"
+              chartType="bar">
+        </canvas>
+      </div>
+    </div > -->

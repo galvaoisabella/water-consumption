@@ -21,7 +21,7 @@ long currentMillis = 0;
 long previousMillis = 0;
 long previousMillisService = 0;
 int interval = 1000;
-long oneHour = 3600000;
+long oneHour = 3000; // 1h = 3600000ms
 float calibrationFactor = 5;
 volatile byte pulseCount;
 byte pulse1Sec = 0;
@@ -208,7 +208,7 @@ void readSensorFlow() {
     flowMilliLitres = (flowRate / 60) * 1000;
     flowLitres = (flowRate / 60);
 
-    // Add the millilitres passed in this second to the cumulative total
+    // Volume total
     totalMilliLitres += flowMilliLitres;
     totalLitres += flowLitres;
 
@@ -222,7 +222,7 @@ void readSensorFlow() {
   }
 
   //Rotina de envio de volume ao servidor
-  if (currentMillis - previousMillisService > oneHour/4 ) {
+  if (currentMillis - previousMillisService > oneHour ) {
     client.send(String(totalLitres));
     Serial.println("Enviado ao servidor");
     previousMillisService = millis();
