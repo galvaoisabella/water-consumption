@@ -4,10 +4,13 @@
   "description": "",
   "main": "websocket.js",
   "dependencies": {
+    "mysql": "^2.18.1",
+    "nodemon": "^2.0.14",
     "websocket": "^1.0.30"
   },
   "devDependencies": {},
   "scripts": {
+    "start": "nodemon websocket.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
