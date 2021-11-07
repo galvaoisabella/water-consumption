@@ -1,5 +1,5 @@
 {
-    "name": "angular-12-nodejs-express-mysql-crud",
+    "name": "water-consumption-api",
     "version": "1.0.0",
     "description": "Node.js Rest Apis with Express, Sequelize & MySQL",
     "main": "server.js",
@@ -15,7 +15,7 @@
         "sequelize",
         "mysql"
     ],
-    "author": "bezkoder",
+    "author": "Isabella",
     "license": "ISC",
     "dependencies": {
         "body-parser": "^1.19.0",
