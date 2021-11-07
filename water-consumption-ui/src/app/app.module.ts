@@ -7,7 +7,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AddTutorialComponent } from './components/add-tutorial/add-tutorial.component';
 import { TutorialDetailsComponent } from './components/tutorial-details/tutorial-details.component';
-import { TutorialsListComponent } from './components/tutorials-list/tutorials-list.component';
+import { HomeComponent } from './components/home/home.component';
 import { ChartsModule } from 'ng2-charts';
 
 @NgModule({
@@ -15,7 +15,7 @@ import { ChartsModule } from 'ng2-charts';
     AppComponent,
     AddTutorialComponent,
     TutorialDetailsComponent,
-    TutorialsListComponent
+    HomeComponent
   ],
   imports: [
     BrowserModule,

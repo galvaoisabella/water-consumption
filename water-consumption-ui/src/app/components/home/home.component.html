@@ -1,0 +1,51 @@
+<div class="list">
+    <div class="d-flex">
+
+        <div class="card">
+            <h2>
+                Valor da tarifa:
+            </h2>
+            <span>
+                R$ 100,00
+            </span>
+        </div>
+
+        <div class="card">
+            <h2>
+                Valor da tarifa:
+            </h2>
+            <span>
+                R$ 100,00
+            </span>
+        </div>
+
+    </div>
+
+
+    <div class="d-flex">
+        <!-- GRAFICO LINHA -->
+        <div style="display: block;" class="line-chart">
+            <h2 class="chart-title">Consumo atual</h2>
+            <canvas baseChart [datasets]="lineChartData" [labels]="lineChartLabels" [options]="lineChartOptions" [colors]="lineChartColors" [legend]="lineChartLegend" chartType="line" [plugins]="lineChartPlugins">
+            </canvas>
+        </div>
+
+        <div class="month-graph">
+            <!-- GRAFICO BARRA - CONSUMO REAL -->
+            <div style="display: block" class="bar-chart">
+                <h2 class="chart-title">Consumo mensal real</h2>
+                <canvas baseChart [datasets]="barChartData" [labels]="barChartLabels" [options]="barChartOptions" [legend]="barChartLegend" chartType="bar">
+                </canvas>
+            </div>
+
+            <!-- GRAFICO BARRA - CONSUMO ESTIMADO -->
+            <div style="display: block" class="bar-chart estimated">
+                <h2 class="chart-title">Consumo mensal estimado x real</h2>
+                <canvas baseChart [datasets]="barChartDataEstimated" [labels]="barChartLabels" [options]="barChartOptions" [legend]="barChartLegend" chartType="bar">
+                </canvas>
+            </div>
+        </div>
+
+    </div>
+
+</div>
