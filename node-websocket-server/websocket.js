@@ -64,25 +64,20 @@ wsServer.on('request', (request) => {
         }
     });
 
-    // Teste com led - Cria uma função que será executada a cada 1 segundo (1000 millis) para enviar o estado do led
+    // Teste com led - Cria uma função que será executada a cada 1 hora (3600000ms) para enviar zerar contador de volume
     let interval = setInterval(() => {
-        // //Envia para o client "ON" ou "OFF" dependendo do estado atual da variável state
-        // client.sendUTF(state? "ON" : "OFF");
-        // //Inverte o estado
-        // state = !state;
-
         // Reseta volume a cada mês
         const date = new Date();
         actualMonth = date.getMonth();
         if(actualMonth > beforeMonth) {
             client.sendUTF('Reset volume');
         }
-    }, 1000);//Tempo entre chamadas => 1000 millis = 1 segundo 
+    }, 3600000);//Tempo entre chamadas => 3600000ms = 1 hora
 
     //Chamado quando a conexão com o client é fechada
     client.on('close', () => {
         console.log("Conexão fechada");
         //Remove o intervalo de envio de estado (teste com led)
-        //clearInterval(interval);
+        clearInterval(interval);
     });
 });
