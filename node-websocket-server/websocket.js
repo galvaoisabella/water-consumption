@@ -1,7 +1,7 @@
 var WebSocketServer = require('websocket').server;
 var http = require('http');
-var date = new Date();
-var createdAt = date.getFullYear()+'-'+date.getMonth()+'-'+date.getDate()+' '+date.getHours()+':'+date.getMinutes()+':'+date.getSeconds()
+var actualMonth;
+var beforeMonth;
 
 var mysql = require('mysql');
 var connection = mysql.createConnection({
@@ -39,16 +39,20 @@ wsServer.on('request', (request) => {
     //Chamado quando o client envia um valor
     client.on('message', (message) => {
         //Se é uma mensagem string utf8
-        if (message.type === 'utf8' ) {
+        if (message.type === 'utf8') {
             //Mostra no console a mensagem
             console.log(message.utf8Data);
 
-            if (message.utf8Data !== 'Hello Server' ) {
+            if (message.utf8Data !== 'Hello Server') {
+                const date = new Date();
+                const createdAt = date.getFullYear() + '-' + date.getMonth() + '-' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
+                const beforeMonth = date.getMonth();
+
                 const volume = message.utf8Data;
 
                 //INSERT NA TABELA
                 const sqlInsert = 'INSERT INTO tables(sensor, createdAt, updatedAt) VALUES (?,?,?);';
-                const values = [volume , createdAt, '2021-09-20 00:15:28'];
+                const values = [volume, createdAt, '2021-09-20 00:15:28'];
                 connection.query(sqlInsert, values, (err, rows) => {
                     if (!err) {
                         console.log('Sucesso na query', rows);
@@ -61,12 +65,19 @@ wsServer.on('request', (request) => {
     });
 
     // Teste com led - Cria uma função que será executada a cada 1 segundo (1000 millis) para enviar o estado do led
-    // let interval = setInterval(() => {
-    //     //Envia para o client "ON" ou "OFF" dependendo do estado atual da variável state
-    //     client.sendUTF(state? "ON" : "OFF");
-    //     //Inverte o estado
-    //     state = !state;
-    // }, 1000);//Tempo entre chamadas => 1000 millis = 1 segundo 
+    let interval = setInterval(() => {
+        // //Envia para o client "ON" ou "OFF" dependendo do estado atual da variável state
+        // client.sendUTF(state? "ON" : "OFF");
+        // //Inverte o estado
+        // state = !state;
+
+        // Reseta volume a cada mês
+        const date = new Date();
+        actualMonth = date.getMonth();
+        if(actualMonth > beforeMonth) {
+            client.sendUTF('Reset volume');
+        }
+    }, 1000);//Tempo entre chamadas => 1000 millis = 1 segundo 
 
     //Chamado quando a conexão com o client é fechada
     client.on('close', () => {

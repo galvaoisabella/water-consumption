@@ -12,7 +12,6 @@
 #define BUTTON D3 // Botão flash arduino
 #define SENSOR D2 // Sensor
 #define DEBUG true
-#define LEDTEST false
 
 /*****************************************************************************************/
 //    SENSOR
@@ -115,17 +114,13 @@ void setup() {
   // Callback onde as mesagens serão recebidas
   client.onMessage([&](WebsocketsMessage message)
   {
-    if (LEDTEST) {
       //Exibe mensagem recebida na serial
       Serial.print("Got Message: ");
       Serial.println(message.data());
 
-      // Teste: Liga/Desliga o led de acordo com o comando
-      if (message.data().equalsIgnoreCase("ON"))
-        digitalWrite(led, HIGH);
-      else if (message.data().equalsIgnoreCase("OFF"))
-        digitalWrite(led, LOW);
-    }
+      // Reseta variável que armazena o total do volume a cada mês
+      if (message.data().equalsIgnoreCase("Reset volume"))
+        totalLitres = 0;
   });
 
 
@@ -208,11 +203,11 @@ void readSensorFlow() {
     flowMilliLitres = (flowRate / 60) * 1000;
     flowLitres = (flowRate / 60);
 
-    // Volume total
+    // Volume total em litros
     totalMilliLitres += flowMilliLitres;
     totalLitres += flowLitres;
 
-    // Print the flow rate for this second in litres / minute
+    // Debug print volume total em litros
     if (DEBUG) {
       Serial.print("Litros: ");
       Serial.print(float(totalLitres));  // Print the integer part of the variable
