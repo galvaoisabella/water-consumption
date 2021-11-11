@@ -1,0 +1,9 @@
+export enum VolumeRange {
+    UNTIL_10_SOCIAL = 10000,
+    UNTIL_10_COMUM = 20000,
+    UNTIL_20_COMUM = 30000,
+    UNTIL_30_COMUM = 40000,
+    UNTIL_50_COMUM = 50000,
+    UNTIL_90_COMUM = 90000,
+    MORE = 999999
+}

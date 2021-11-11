@@ -1,6 +1,8 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { ChartDataSets, ChartOptions, ChartType } from 'chart.js';
-import { BaseChartDirective, Color, Label } from 'ng2-charts';
+import { Component, OnInit } from '@angular/core';
+import { ChartDataSets, ChartOptions, ChartPoint } from 'chart.js';
+import { Color, Label } from 'ng2-charts';
+import { TaxValue } from 'src/app/enums/tax-value.enum';
+import { VolumeRange } from 'src/app/enums/volume-range.enum';
 import { SensorData } from 'src/app/models/sensorData.model';
 import { SensorService } from 'src/app/services/sensor.service';
 
@@ -10,22 +12,25 @@ import { SensorService } from 'src/app/services/sensor.service';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-  sensorData?: SensorData[];
-  currentTutorial: SensorData = {};
-  currentIndex = -1;
-  title = '';
 
-  //Parâmetros gráfico de barras
+  //Parâmetros gráficos de barras
   public barChartOptions = {
     scaleShowVerticalLines: false,
-    responsive: true
+    responsive: true,
+    backgroundColor: 'rgba(68,142,355,0.4)',
   };
-  public barChartLabels = ['2006', '2007', '2008', '2009', '2010', '2011', '2012'];
+  public barChartColors: Color[] = [
+    {
+      borderColor: 'rgba(0,51,102)',
+      backgroundColor: 'rgba(68,142,355,0.4)',
+    },
+  ];
+  public barChartLabels = [];
   public barChartType = 'bar';
   public barChartLegend = true;
-  public barChartData = [
-    { data: [65, 59, 80, 81, 56, 55, 40], label: 'Volume(L)' },
-  ];
+  public barChartData = [{ data: [], label: 'Volume(L)' }]
+
+  // Parâmetros de grafico barra de estimativa
   public barChartDataEstimated = [
     { data: [65, 59, 80, 81, 56, 55, 40], label: 'Volume(L)' },
     { data: [70, 50, 35, 100, 56, 40, 55], label: 'Volume(L) estimado' },
@@ -33,9 +38,9 @@ export class HomeComponent implements OnInit {
 
   //Parametros grafico de linha
   public lineChartData: ChartDataSets[] = [
-    { data: [65, 59, 80, 81, 56, 55, 40], label: 'Volume(L) real' },
+    { data: [], label: 'Volume(L) real' },
   ];
-  public lineChartLabels: Label[] = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+  public lineChartLabels: Label[] = [];
   public lineChartOptions: ChartOptions = {
     responsive: true,
   };
@@ -52,29 +57,81 @@ export class HomeComponent implements OnInit {
   constructor(private sensorService: SensorService) { }
 
   ngOnInit(): void {
-    // this.retrieveTutorials();
+    this.retrieveTutorials();
   }
 
   retrieveTutorials(): void {
     this.sensorService.getAll()
       .subscribe(
         data => {
-          this.sensorData = data;
-          console.log(data);
+          this.buildBarChart(data);
+          this.buildLineChart(data);
         },
         error => {
           console.log(error);
         });
   }
 
-  refreshList(): void {
-    this.retrieveTutorials();
-    this.currentTutorial = {};
-    this.currentIndex = -1;
+  public buildBarChart(sensorData: SensorData[]): void {
+    let arrayDate: any = [];
+    let arrayVolumeByMonth: any = [];
+    let previousDate: any = '';
+    let volumeByMonth: any = 0;
+
+    sensorData.forEach((data) => {
+
+      if (data.date === previousDate) {
+        volumeByMonth += +data.volume;
+        console.log('data igual a data anterior', volumeByMonth);
+      } else {
+        volumeByMonth = +data.volume;
+        arrayDate.push(data.date);
+      }
+
+      arrayVolumeByMonth.push(volumeByMonth);
+      previousDate = data.date;
+    });
+
+    arrayVolumeByMonth.slice(1, arrayVolumeByMonth.length);
+    this.barChartData[0].data = arrayVolumeByMonth;
+    this.barChartLabels = arrayDate;
+
+    console.log('array volume', arrayVolumeByMonth, 'array taxa',this.taxCalc(arrayVolumeByMonth));
   }
 
-  setActiveTutorial(sensor: SensorData, index: number): void {
-    this.currentTutorial = sensor;
-    this.currentIndex = index;
+  public buildLineChart(sensorData: SensorData[]): void {
+    let arrayVolume: any = [];
+    let arrayHour: any = [];
+
+    sensorData.forEach((data) => {
+      arrayVolume.push(data.volume);
+      arrayHour.push(data.hour);
+    })
+
+    this.lineChartData[0].data = arrayVolume;
+    this.lineChartLabels = arrayHour;
+  }
+
+  public taxCalc(volumeData: number[]): Array<number> {
+    let taxValue = 0;
+    let taxByMonth: number[] = [];
+
+    volumeData.forEach((volume) => {
+      if (volume <= VolumeRange.UNTIL_10_COMUM) {
+        taxValue = TaxValue.UNTIL_10_COMUM;
+      } else if ((volume > VolumeRange.UNTIL_10_COMUM) && (volume <= VolumeRange.UNTIL_20_COMUM)) {
+        taxValue = TaxValue.UNTIL_10_COMUM + TaxValue.UNTIL_20_COMUM;
+      } else if ((volume > VolumeRange.UNTIL_20_COMUM) && (volume <= VolumeRange.UNTIL_30_COMUM)) {
+        taxValue = TaxValue.UNTIL_10_COMUM + TaxValue.UNTIL_20_COMUM + TaxValue.UNTIL_30_COMUM;
+      } else if ((volume > VolumeRange.UNTIL_30_COMUM) && (volume <= VolumeRange.UNTIL_50_COMUM)) {
+        taxValue = TaxValue.UNTIL_10_COMUM + TaxValue.UNTIL_20_COMUM + TaxValue.UNTIL_30_COMUM + TaxValue.UNTIL_50_COMUM;
+      } else if ((volume > VolumeRange.UNTIL_50_COMUM) && (volume <= VolumeRange.UNTIL_90_COMUM)) {
+        taxValue = TaxValue.UNTIL_10_COMUM + TaxValue.UNTIL_20_COMUM + TaxValue.UNTIL_30_COMUM + TaxValue.UNTIL_50_COMUM + TaxValue.UNTIL_90_COMUM
+      } else if (volume > VolumeRange.UNTIL_90_COMUM) {
+        taxValue = TaxValue.UNTIL_10_COMUM + TaxValue.MORE;
+      }
+      taxByMonth.push(taxValue);
+    })
+    return taxByMonth;
   }
 }

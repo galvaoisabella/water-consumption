@@ -45,19 +45,20 @@ wsServer.on('request', (request) => {
 
             if (message.utf8Data !== 'Hello Server') {
                 const date = new Date();
+                const monthYear = date.getMonth() + '/' + date.getFullYear();
+                const hour = date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
                 const createdAt = date.getFullYear() + '-' + date.getMonth() + '-' + date.getDate() + ' ' + date.getHours() + ':' + date.getMinutes() + ':' + date.getSeconds();
-                const beforeMonth = date.getMonth();
 
                 const volume = message.utf8Data;
 
                 //INSERT NA TABELA
-                const sqlInsert = 'INSERT INTO tables(sensor, createdAt, updatedAt) VALUES (?,?,?);';
-                const values = [volume, createdAt, '2021-09-20 00:15:28'];
+                const sqlInsert = 'INSERT INTO waterconsumptions(volume, hour, date, createdAt, updatedAt) VALUES (?,?,?,?,?);';
+                const values = [volume, hour, monthYear, createdAt, createdAt];
                 connection.query(sqlInsert, values, (err, rows) => {
                     if (!err) {
                         console.log('Sucesso na query', rows);
                     } else {
-                        console.log('Erro na query');
+                        console.log('Erro na query', err);
                     }
                 });
             }
@@ -69,10 +70,10 @@ wsServer.on('request', (request) => {
         // Reseta volume a cada mês
         const date = new Date();
         actualMonth = date.getMonth();
-        if(actualMonth > beforeMonth) {
+        if (actualMonth > beforeMonth) {
             client.sendUTF('Reset volume');
         }
-    }, 3600000);//Tempo entre chamadas => 3600000ms = 1 hora
+    }, 3600000); //Tempo entre chamadas => 3600000ms = 1 hora
 
     //Chamado quando a conexão com o client é fechada
     client.on('close', () => {

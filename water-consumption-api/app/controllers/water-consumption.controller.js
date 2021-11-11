@@ -14,7 +14,9 @@ exports.create = (req, res) => {
 
     // Create a WaterConsumption
     const waterConsumption = {
-        volume: req.body.volume
+        volume: req.body.volume,
+        hour: req.body.hour,
+        date: req.body.date,
     };
 
     // Save WaterConsumption in the database

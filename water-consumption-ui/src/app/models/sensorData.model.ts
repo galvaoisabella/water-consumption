@@ -1,5 +1,7 @@
 export class SensorData {
-  id?: number;
-  createdAt?: string;
-  sensor?: number;
+  public id?: number;
+  public createdAt?: string;
+  public volume?: any;
+  public date?: string;
+  public hour?: string;
 }

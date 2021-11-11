@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { SensorData } from '../models/sensorData.model';
 
-const baseUrl = 'http://localhost:8080/api/table';
+const baseUrl = 'http://localhost:8080/api/water-consumption';
 
 @Injectable({
   providedIn: 'root'
