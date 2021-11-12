@@ -32,8 +32,8 @@ export class HomeComponent implements OnInit {
 
   // Parâmetros de grafico barra de estimativa
   public barChartDataEstimated = [
-    { data: [65, 59, 80, 81, 56, 55, 40], label: 'Volume(L)' },
-    { data: [70, 50, 35, 100, 56, 40, 55], label: 'Volume(L) estimado' },
+    { data: [65, 59, 80, 81, 56, 55, 40], label: 'Reais(R$)' },
+   // { data: [70, 50, 35, 100, 56, 40, 55], label: 'Volume(L) estimado' },
   ];
 
   //Parametros grafico de linha
@@ -95,6 +95,10 @@ export class HomeComponent implements OnInit {
     arrayVolumeByMonth.slice(1, arrayVolumeByMonth.length);
     this.barChartData[0].data = arrayVolumeByMonth;
     this.barChartLabels = arrayDate;
+
+    
+
+    this.barChartDataEstimated[0].data = this.taxCalc(arrayVolumeByMonth);
 
     console.log('array volume', arrayVolumeByMonth, 'array taxa',this.taxCalc(arrayVolumeByMonth));
   }

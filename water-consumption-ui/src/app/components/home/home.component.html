@@ -33,14 +33,14 @@
         <div class="month-graph">
             <!-- GRAFICO BARRA - CONSUMO REAL -->
             <div *ngIf="barChartLabels.length > 0" style="display: block" class="bar-chart">
-                <h2 class="chart-title">Consumo mensal real</h2>
+                <h2 class="chart-title">Consumo estimado litros(L)</h2>
                 <canvas baseChart [datasets]="barChartData" [labels]="barChartLabels" [options]="barChartOptions" [colors]="barChartColors" [legend]="barChartLegend" chartType="bar">
                 </canvas>
             </div>
 
             <!-- GRAFICO BARRA - CONSUMO ESTIMADO -->
             <div style="display: block" class="bar-chart estimated">
-                <h2 class="chart-title">Consumo mensal estimado x real</h2>
+                <h2 class="chart-title">Consumo estimado reais(R$)</h2>
                 <canvas baseChart [datasets]="barChartDataEstimated" [labels]="barChartLabels" [options]="barChartOptions" [colors]="barChartColors" [legend]="barChartLegend" chartType="bar">
                 </canvas>
             </div>
