@@ -12,7 +12,9 @@ import { SensorService } from 'src/app/services/sensor.service';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-
+  public date = new Date();
+  public actualDate = this.date.getMonth() + '/' + this.date.getUTCFullYear();
+  public actualVolume: number = 0;
   //Parâmetros gráficos de barras
   public barChartOptions = {
     scaleShowVerticalLines: false,
@@ -33,7 +35,7 @@ export class HomeComponent implements OnInit {
   // Parâmetros de grafico barra de estimativa
   public barChartDataEstimated = [
     { data: [65, 59, 80, 81, 56, 55, 40], label: 'Reais(R$)' },
-   // { data: [70, 50, 35, 100, 56, 40, 55], label: 'Volume(L) estimado' },
+    // { data: [70, 50, 35, 100, 56, 40, 55], label: 'Volume(L) estimado' },
   ];
 
   //Parametros grafico de linha
@@ -77,30 +79,38 @@ export class HomeComponent implements OnInit {
     let arrayVolumeByMonth: any = [];
     let previousDate: any = '';
     let volumeByMonth: any = 0;
-
+    let i = 0;
     sensorData.forEach((data) => {
 
       if (data.date === previousDate) {
         volumeByMonth += +data.volume;
-        console.log('data igual a data anterior', volumeByMonth);
+
+        arrayVolumeByMonth[arrayDate.indexOf(data.date)] = volumeByMonth;
+        console.log('repetição', volumeByMonth  , data.volume, arrayVolumeByMonth)
+        
       } else {
         volumeByMonth = +data.volume;
         arrayDate.push(data.date);
+        arrayVolumeByMonth.push(volumeByMonth);
       }
 
-      arrayVolumeByMonth.push(volumeByMonth);
+     // arrayVolumeByMonth.push(volumeByMonth);
       previousDate = data.date;
-    });
+      i++;
+    }); 
 
-    arrayVolumeByMonth.slice(1, arrayVolumeByMonth.length);
+    //arrayVolumeByMonth.slice(1, arrayVolumeByMonth.length-1);
+    
     this.barChartData[0].data = arrayVolumeByMonth;
     this.barChartLabels = arrayDate;
 
-    
+    this.actualVolume = arrayVolumeByMonth[arrayDate.indexOf(this.actualDate)];
+
+
 
     this.barChartDataEstimated[0].data = this.taxCalc(arrayVolumeByMonth);
 
-    console.log('array volume', arrayVolumeByMonth, 'array taxa',this.taxCalc(arrayVolumeByMonth));
+    console.log('array volume', arrayVolumeByMonth, 'array taxa', this.taxCalc(arrayVolumeByMonth));
   }
 
   public buildLineChart(sensorData: SensorData[]): void {
