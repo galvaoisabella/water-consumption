@@ -3,7 +3,7 @@
 
         <div class="card">
             <h2>
-                Consumo mês atual:
+                Consumo atual:
             </h2>
             <span>
                 {{ actualVolume }}
@@ -12,10 +12,28 @@
 
         <div class="card">
             <h2>
-                Valor da conta mês atual:
+                Valor da conta atual:
             </h2>
             <span>
-                R$ 100,00
+                {{ actualTax | currency:'BRL' }}
+            </span>
+        </div>
+
+        <div class="card">
+            <h2>
+                Consumo previsto:
+            </h2>
+            <span>
+                {{ actualVolume }}
+            </span>
+        </div>
+
+        <div class="card">
+            <h2>
+                Valor previsto da próxima conta:
+            </h2>
+            <span>
+                {{ actualTax | currency:'BRL' }}
             </span>
         </div>
 
@@ -41,7 +59,7 @@
             <!-- GRAFICO BARRA - CONSUMO ESTIMADO -->
             <div style="display: block" class="bar-chart estimated">
                 <h2 class="chart-title">Consumo reais(R$)</h2>
-                <canvas baseChart [datasets]="barChartDataEstimated" [labels]="barChartLabels" [options]="barChartOptions" [colors]="barChartColors" [legend]="barChartLegend" chartType="bar">
+                <canvas baseChart [datasets]="barChartValueTax" [labels]="barChartLabels" [options]="barChartOptions" [colors]="barChartColors" [legend]="barChartLegend" chartType="bar">
                 </canvas>
             </div>
         </div>

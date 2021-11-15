@@ -33,7 +33,7 @@ export class HomeComponent implements OnInit {
   public barChartData = [{ data: [], label: 'Volume(L)' }]
 
   // Parâmetros de grafico barra de estimativa
-  public barChartDataEstimated = [
+  public barChartValueTax = [
     { data: [65, 59, 80, 81, 56, 55, 40], label: 'Reais(R$)' },
     // { data: [70, 50, 35, 100, 56, 40, 55], label: 'Volume(L) estimado' },
   ];
@@ -55,6 +55,7 @@ export class HomeComponent implements OnInit {
   public lineChartLegend = true;
   public lineChartType = 'line';
   public lineChartPlugins = [];
+  public actualTax: number = 0;
 
   constructor(private sensorService: SensorService) { }
 
@@ -74,6 +75,10 @@ export class HomeComponent implements OnInit {
         });
   }
 
+  /**
+   * Gráficos de barra
+   * @param sensorData valores em volume (L) lidos pelo sensor
+   */
   public buildBarChart(sensorData: SensorData[]): void {
     let arrayDate: any = [];
     let arrayVolumeByMonth: any = [];
@@ -86,29 +91,33 @@ export class HomeComponent implements OnInit {
         volumeByMonth += +data.volume;
 
         arrayVolumeByMonth[arrayDate.indexOf(data.date)] = volumeByMonth;
-        console.log('repetição', volumeByMonth  , data.volume, arrayVolumeByMonth)
-        
+        console.log('repetição', volumeByMonth, data.volume, arrayVolumeByMonth)
+
       } else {
         volumeByMonth = +data.volume;
         arrayDate.push(data.date);
         arrayVolumeByMonth.push(volumeByMonth);
       }
 
-     // arrayVolumeByMonth.push(volumeByMonth);
+      // arrayVolumeByMonth.push(volumeByMonth);
       previousDate = data.date;
       i++;
-    }); 
+    });
 
-    //arrayVolumeByMonth.slice(1, arrayVolumeByMonth.length-1);
-    
-    this.barChartData[0].data = arrayVolumeByMonth;
+    // Datas de consumo (MM/YYYY)
     this.barChartLabels = arrayDate;
 
+    // Volume consumido por mês
+    this.barChartData[0].data = arrayVolumeByMonth;
+
+    // Valores de taxa até o mês atual
+    this.barChartValueTax[0].data = this.taxCalc(arrayVolumeByMonth);
+
+    // Valores reais de consumo e taxa do mês atual
+    this.actualTax = this.barChartValueTax[0].data[arrayDate.indexOf(this.actualDate)];
     this.actualVolume = arrayVolumeByMonth[arrayDate.indexOf(this.actualDate)];
 
-
-
-    this.barChartDataEstimated[0].data = this.taxCalc(arrayVolumeByMonth);
+    // To-DO: Valores estimados de consumo e taxa do mês atual
 
     console.log('array volume', arrayVolumeByMonth, 'array taxa', this.taxCalc(arrayVolumeByMonth));
   }
@@ -126,6 +135,11 @@ export class HomeComponent implements OnInit {
     this.lineChartLabels = arrayHour;
   }
 
+  /**
+   * Calculo da taxa de pagamento da conta com base nos valores de 01/11/2021
+   * @param volumeData Array com volume de agua consumidos por mês
+   * @returns 
+   */
   public taxCalc(volumeData: number[]): Array<number> {
     let taxValue = 0;
     let taxByMonth: number[] = [];
