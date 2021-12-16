@@ -1,7 +1,7 @@
 module.exports = {
   HOST: "localhost",
-  USER: "root",
-  PASSWORD: "Why-s0-s3r10us",
+  USER: "isabella",
+  PASSWORD: "123456",
   DB: "bdarduino",
   dialect: "mysql",
   pool: {
